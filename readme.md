@@ -44,7 +44,7 @@ Contributions are welcome! If you have suggestions or want to collaborate, feel 
 - Submit a pull request with your changes.
 
 ### License
-This project is open-source and available under the [MIT License](LICENSE).
+This project is open-source
 
 ### Acknowledgments
 - Built with the Godot Engine.
