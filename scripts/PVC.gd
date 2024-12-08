@@ -63,16 +63,15 @@ func _input(event):
 						get_tree().paused = true
 						return  # Exit early if the game is over
 
-
-
 					# Switch players
 					player *= -1
-					temp_marker.queue_free()
+					if temp_marker != null:
+						temp_marker.queue_free()
 					create_marker(player, player_panel_pos + Vector2i(cell_size / 2.0, cell_size / 2.0), true)
 					print(grid_data)
 
 func new_game():
-	# Restart variabls
+	# Restart variables
 	moves = 0
 	player = 1
 	winner = 0
@@ -84,6 +83,7 @@ func new_game():
 					[0, 0, 0], 
 					[0, 0, 0]
 				]
+	temp_marker = null  # Ensure temp_marker is initialized
 	get_tree().call_group("crosses", "queue_free")
 	get_tree().call_group("circles", "queue_free")
 	# Create a marker to show starting player
@@ -93,12 +93,17 @@ func new_game():
 
 func create_marker(player, position, temp=false):
 	if player == 1:
+		if circle_scene == null:
+			print("circle_scene is not assigned!")
+			return
 		var circle = circle_scene.instantiate()
 		circle.position = position
 		add_child(circle)
 		if temp: temp_marker = circle
-
 	else:
+		if cross_scene == null:
+			print("cross_scene is not assigned!")
+			return
 		var cross = cross_scene.instantiate()
 		cross.position = position
 		add_child(cross)
@@ -123,7 +128,6 @@ func check_winner():
 		return -1  # Player 2 wins
 
 	return 0  # No winner yet
-
 
 func _on_game_over_menu_restart_game():
 	new_game()

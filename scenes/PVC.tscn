@@ -1,18 +1,20 @@
-[gd_scene load_steps=7 format=3 uid="uid://ch2g6tbkvo8cv"]
+[gd_scene load_steps=9 format=3 uid="uid://ltr4c7l5vn0u"]
 
-[ext_resource type="Script" path="res://scripts/pvp.gd" id="1_13jx7"]
-[ext_resource type="PackedScene" uid="uid://dy4rcrhvvbgmd" path="res://scenes/board.tscn" id="1_wh50o"]
-[ext_resource type="PackedScene" uid="uid://c4n4a7fclkhf7" path="res://scenes/game_over_menu.tscn" id="5_qcv6n"]
+[ext_resource type="Script" path="res://scripts/pvc.gd" id="1_n1ljl"]
+[ext_resource type="PackedScene" uid="uid://d0qa478r6x8c6" path="res://scenes/circle.tscn" id="2_ygx1q"]
+[ext_resource type="PackedScene" uid="uid://bqjnn6mhghxc3" path="res://scenes/cross.tscn" id="3_po6q5"]
+[ext_resource type="PackedScene" uid="uid://dy4rcrhvvbgmd" path="res://scenes/board.tscn" id="4_cklak"]
+[ext_resource type="PackedScene" uid="uid://c4n4a7fclkhf7" path="res://scenes/game_over_menu.tscn" id="5_36vtf"]
 
-[sub_resource type="Theme" id="Theme_0lk0a"]
+[sub_resource type="Theme" id="Theme_wu8d1"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xtntq"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8i7pu"]
 bg_color = Color(0.910011, 0.44764, 0.271838, 1)
 border_width_left = 5
 border_color = Color(0, 0, 0, 1)
 border_blend = true
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w572p"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k3u1y"]
 bg_color = Color(1, 1, 1, 1)
 border_width_left = 5
 border_width_top = 5
@@ -26,10 +28,12 @@ corner_radius_bottom_left = 15
 shadow_size = 5
 shadow_offset = Vector2(5, 5)
 
-[node name="Node" type="Node"]
-script = ExtResource("1_13jx7")
+[node name="PVC" type="Node"]
+script = ExtResource("1_n1ljl")
+circle_scene = ExtResource("2_ygx1q")
+cross_scene = ExtResource("3_po6q5")
 
-[node name="Board" parent="." instance=ExtResource("1_wh50o")]
+[node name="Board" parent="." instance=ExtResource("4_cklak")]
 position = Vector2(300, 300)
 
 [node name="SidePanel" type="Panel" parent="."]
@@ -41,8 +45,8 @@ anchor_bottom = 1.0
 offset_left = -300.0
 grow_horizontal = 0
 grow_vertical = 2
-theme = SubResource("Theme_0lk0a")
-theme_override_styles/panel = SubResource("StyleBoxFlat_xtntq")
+theme = SubResource("Theme_wu8d1")
+theme_override_styles/panel = SubResource("StyleBoxFlat_8i7pu")
 
 [node name="PlayerLabel" type="Label" parent="."]
 offset_left = 600.0
@@ -59,9 +63,9 @@ offset_left = 650.0
 offset_top = 200.0
 offset_right = 850.0
 offset_bottom = 400.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_w572p")
+theme_override_styles/panel = SubResource("StyleBoxFlat_k3u1y")
 
-[node name="GameOverMenu" parent="." instance=ExtResource("5_qcv6n")]
+[node name="GameOverMenu" parent="." instance=ExtResource("5_36vtf")]
 process_mode = 2
 
 [connection signal="restart_game" from="GameOverMenu" to="." method="_on_game_over_menu_restart_game"]
