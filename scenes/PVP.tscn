@@ -1,7 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://ch2g6tbkvo8cv"]
+[gd_scene load_steps=9 format=3 uid="uid://ch2g6tbkvo8cv"]
 
 [ext_resource type="Script" path="res://scripts/pvp.gd" id="1_13jx7"]
 [ext_resource type="PackedScene" uid="uid://dy4rcrhvvbgmd" path="res://scenes/board.tscn" id="1_wh50o"]
+[ext_resource type="PackedScene" uid="uid://d0qa478r6x8c6" path="res://scenes/circle.tscn" id="2_e4ygu"]
+[ext_resource type="PackedScene" uid="uid://bqjnn6mhghxc3" path="res://scenes/cross.tscn" id="3_kpg7e"]
 [ext_resource type="PackedScene" uid="uid://c4n4a7fclkhf7" path="res://scenes/game_over_menu.tscn" id="5_qcv6n"]
 
 [sub_resource type="Theme" id="Theme_0lk0a"]
@@ -28,6 +30,8 @@ shadow_offset = Vector2(5, 5)
 
 [node name="Node" type="Node"]
 script = ExtResource("1_13jx7")
+circle_scene = ExtResource("2_e4ygu")
+cross_scene = ExtResource("3_kpg7e")
 
 [node name="Board" parent="." instance=ExtResource("1_wh50o")]
 position = Vector2(300, 300)

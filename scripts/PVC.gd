@@ -39,7 +39,7 @@ func _input(event):
 				var x = int(event.position.x / cell_size)
 				var y = int(event.position.y / cell_size)
 				grid_pos = Vector2i(x, y)
-				if grid_data[grid_pos.y][grid_pos.x] == 0:
+				if grid_data[grid_pos.y][grid_pos.x] == 0 and player == 1:
 					moves += 1
 					grid_data[y][x] = player
 					create_marker(player, grid_pos * cell_size + Vector2i(cell_size / 2.0, cell_size / 2.0))
@@ -69,6 +69,10 @@ func _input(event):
 						temp_marker.queue_free()
 					create_marker(player, player_panel_pos + Vector2i(cell_size / 2.0, cell_size / 2.0), true)
 					print(grid_data)
+
+					# Computer's turn if player 2 (computer)
+					if player == -1:
+						perform_computer_move()
 
 func new_game():
 	# Restart variables
@@ -131,3 +135,44 @@ func check_winner():
 
 func _on_game_over_menu_restart_game():
 	new_game()
+
+# New function to make a move for the computer
+func perform_computer_move():
+	var empty_cells = []
+	# Gather all empty cells
+	for y in range(3):
+		for x in range(3):
+			if grid_data[y][x] == 0:
+				empty_cells.append(Vector2i(x, y))
+
+	if empty_cells.size() > 0:
+		# Choose a random cell from the available ones
+		var random_cell = empty_cells[randi() % empty_cells.size()]
+		grid_data[random_cell.y][random_cell.x] = player
+		moves += 1
+		create_marker(player, random_cell * cell_size + Vector2i(cell_size / 2.0, cell_size / 2.0))
+
+		# Check for winner after computer move
+		winner = check_winner()
+		if winner != 0:
+			# Show game over menu with winner message
+			if winner == 1:
+				$GameOverMenu.get_node("ResultLabel").text = "Player 1 wins!"
+			elif winner == -1:
+				$GameOverMenu.get_node("ResultLabel").text = "Player 2 wins!"
+			$GameOverMenu.show()
+			get_tree().paused = true
+			return  # Exit early if the game is over
+
+		# Check for tie
+		if moves == 9 and winner == 0:
+			$GameOverMenu.get_node("ResultLabel").text = "It's a draw!"
+			$GameOverMenu.show()
+			get_tree().paused = true
+			return  # Exit early if the game is over
+
+		# Switch to player 1 after computer move
+		player *= -1
+		if temp_marker != null:
+			temp_marker.queue_free()
+		create_marker(player, player_panel_pos + Vector2i(cell_size / 2.0, cell_size / 2.0), true)
