@@ -131,3 +131,6 @@ func check_winner():
 
 func _on_game_over_menu_restart_game():
 	new_game()
+
+func _on_go_to_menu_pressed():
+	get_tree().change_scene_to_file("res://menu.tscn")

@@ -176,3 +176,7 @@ func perform_computer_move():
 		if temp_marker != null:
 			temp_marker.queue_free()
 		create_marker(player, player_panel_pos + Vector2i(cell_size / 2.0, cell_size / 2.0), true)
+
+
+func _on_go_to_menu_pressed():
+	get_tree().change_scene_to_file("res://menu.tscn")

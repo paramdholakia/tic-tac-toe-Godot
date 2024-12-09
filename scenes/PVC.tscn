@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://ltr4c7l5vn0u"]
+[gd_scene load_steps=10 format=3 uid="uid://ltr4c7l5vn0u"]
 
 [ext_resource type="Script" path="res://scripts/pvc.gd" id="1_n1ljl"]
 [ext_resource type="PackedScene" uid="uid://d0qa478r6x8c6" path="res://scenes/circle.tscn" id="2_ygx1q"]
@@ -27,6 +27,21 @@ corner_radius_bottom_right = 15
 corner_radius_bottom_left = 15
 shadow_size = 5
 shadow_offset = Vector2(5, 5)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r83bk"]
+bg_color = Color(0.0588235, 0.631373, 0.117647, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.0588235, 0.631373, 0.117647, 1)
+border_blend = true
+corner_radius_top_left = 25
+corner_radius_top_right = 25
+corner_radius_bottom_right = 25
+corner_radius_bottom_left = 25
+shadow_size = 5
+shadow_offset = Vector2(10, 10)
 
 [node name="PVC" type="Node"]
 script = ExtResource("1_n1ljl")
@@ -68,4 +83,17 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_k3u1y")
 [node name="GameOverMenu" parent="." instance=ExtResource("5_36vtf")]
 process_mode = 2
 
+[node name="GoToMenu" type="Button" parent="."]
+offset_left = 616.075
+offset_top = 526.0
+offset_right = 1068.07
+offset_bottom = 601.0
+scale = Vector2(0.6, 0.6)
+theme_override_colors/icon_normal_color = Color(0, 0, 0, 1)
+theme_override_colors/icon_disabled_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxFlat_r83bk")
+text = "GO BACK TO MENU"
+
 [connection signal="restart_game" from="GameOverMenu" to="." method="_on_game_over_menu_restart_game"]
+[connection signal="pressed" from="GoToMenu" to="." method="_on_go_to_menu_pressed"]
