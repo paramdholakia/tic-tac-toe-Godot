@@ -179,4 +179,4 @@ func perform_computer_move():
 
 
 func _on_go_to_menu_pressed():
-	get_tree().change_scene_to_file("res://menu.tscn")
+	get_tree().change_scene_to_file("res://Main.tscn")
