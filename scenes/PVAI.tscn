@@ -1,0 +1,99 @@
+[gd_scene load_steps=10 format=3 uid="uid://cgdc2yu4qv832"]
+
+[ext_resource type="Script" path="res://scripts/PVAI.gd" id="1_cmsmf"]
+[ext_resource type="PackedScene" uid="uid://d0qa478r6x8c6" path="res://scenes/circle.tscn" id="2_j36gg"]
+[ext_resource type="PackedScene" uid="uid://bqjnn6mhghxc3" path="res://scenes/cross.tscn" id="3_4i415"]
+[ext_resource type="PackedScene" uid="uid://dy4rcrhvvbgmd" path="res://scenes/board.tscn" id="4_1xwrk"]
+[ext_resource type="PackedScene" uid="uid://c4n4a7fclkhf7" path="res://scenes/game_over_menu.tscn" id="5_bnso7"]
+
+[sub_resource type="Theme" id="Theme_wu8d1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8i7pu"]
+bg_color = Color(0.910011, 0.44764, 0.271838, 1)
+border_width_left = 5
+border_color = Color(0, 0, 0, 1)
+border_blend = true
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k3u1y"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.851769, 0.851769, 0.851769, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+shadow_size = 5
+shadow_offset = Vector2(5, 5)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r83bk"]
+bg_color = Color(0.0588235, 0.631373, 0.117647, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.0588235, 0.631373, 0.117647, 1)
+border_blend = true
+corner_radius_top_left = 25
+corner_radius_top_right = 25
+corner_radius_bottom_right = 25
+corner_radius_bottom_left = 25
+shadow_size = 5
+shadow_offset = Vector2(10, 10)
+
+[node name="PVAI" type="Node"]
+script = ExtResource("1_cmsmf")
+circle_scene = ExtResource("2_j36gg")
+cross_scene = ExtResource("3_4i415")
+
+[node name="Board" parent="." instance=ExtResource("4_1xwrk")]
+position = Vector2(300, 300)
+
+[node name="SidePanel" type="Panel" parent="."]
+custom_minimum_size = Vector2(300, 600)
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -300.0
+grow_horizontal = 0
+grow_vertical = 2
+theme = SubResource("Theme_wu8d1")
+theme_override_styles/panel = SubResource("StyleBoxFlat_8i7pu")
+
+[node name="PlayerLabel" type="Label" parent="."]
+offset_left = 600.0
+offset_top = 120.0
+offset_right = 900.0
+offset_bottom = 190.0
+theme_override_font_sizes/font_size = 36
+text = "Next Player : "
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayerPanel" type="Panel" parent="."]
+offset_left = 650.0
+offset_top = 200.0
+offset_right = 850.0
+offset_bottom = 400.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_k3u1y")
+
+[node name="GameOverMenu" parent="." instance=ExtResource("5_bnso7")]
+process_mode = 2
+
+[node name="GoToMenu" type="Button" parent="."]
+offset_left = 616.075
+offset_top = 526.0
+offset_right = 1068.07
+offset_bottom = 601.0
+scale = Vector2(0.6, 0.6)
+theme_override_colors/icon_normal_color = Color(0, 0, 0, 1)
+theme_override_colors/icon_disabled_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxFlat_r83bk")
+text = "GO BACK TO MENU"
+
+[connection signal="restart_game" from="GameOverMenu" to="." method="_on_game_over_menu_restart_game"]
+[connection signal="pressed" from="GoToMenu" to="." method="_on_go_to_menu_pressed"]
