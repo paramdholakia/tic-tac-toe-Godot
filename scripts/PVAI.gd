@@ -15,22 +15,30 @@ var moves: int
 
 func _ready():
 	board_size = $Board.texture.get_width()
-	cell_size = board_size / 3
+	cell_size = int(board_size / 3.0)  # Explicitly cast to int
 	player_panel_pos = $PlayerPanel.get_position()
 	new_game()
 
-func _process(delta):
+func _process(_delta):
 	pass
+
+func create_marker(marker_player, position, temp = false):
+	var marker = (circle_scene if marker_player == 1 else cross_scene).instantiate()
+	marker.position = position
+	add_child(marker)
+	if temp:
+		temp_marker = marker
 
 func _input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		if event.position.x < board_size:
-			var x = int(event.position.x / cell_size)
-			var y = int(event.position.y / cell_size)
+			var x = int(event.position.x / float(cell_size))  # Use float division
+			var y = int(event.position.y / float(cell_size))  # Use float division
 			if grid_data[y][x] == 0 and player == 1:
 				moves += 1
 				grid_data[y][x] = player
-				create_marker(player, Vector2i(x, y) * cell_size + Vector2i(cell_size / 2, cell_size / 2))
+				@warning_ignore("narrowing_conversion")
+				create_marker(player, Vector2i(x, y) * cell_size + Vector2i(cell_size / 2.0, cell_size / 2.0))
 
 				if check_end_state():
 					return
@@ -38,7 +46,8 @@ func _input(event):
 				player *= -1
 				if temp_marker:
 					temp_marker.queue_free()
-				create_marker(player, player_panel_pos + Vector2i(cell_size / 2, cell_size / 2), true)
+				@warning_ignore("narrowing_conversion")
+				create_marker(player, player_panel_pos + Vector2i(cell_size / 2.0, cell_size / 2.0), true)
 
 				if player == -1:
 					best_move()
@@ -51,30 +60,33 @@ func new_game():
 	temp_marker = null
 	get_tree().call_group("crosses", "queue_free")
 	get_tree().call_group("circles", "queue_free")
-	create_marker(player, player_panel_pos + Vector2i(cell_size / 2, cell_size / 2), true)
+	@warning_ignore("narrowing_conversion")
+	create_marker(player, player_panel_pos + Vector2i(cell_size / 2.0, cell_size / 2.0), true)
 	$GameOverMenu.hide()
 	get_tree().paused = false
 
-func create_marker(player, position, temp = false):
-	var marker = (circle_scene if player == 1 else cross_scene).instantiate()
-	marker.position = position
-	add_child(marker)
-	if temp:
-		temp_marker = marker
+func check_winner_grid(grid):
+	# Check rows and columns
+	for i in range(3):
+		var row = grid[i]
+		if abs(row[0] + row[1] + row[2]) == 3:
+			return row[0]
+		var col = [grid[0][i], grid[1][i], grid[2][i]]
+		if abs(col[0] + col[1] + col[2]) == 3:
+			return col[0]
+	
+	# Check diagonals
+	var diag1 = grid[0][0] + grid[1][1] + grid[2][2]
+	var diag2 = grid[0][2] + grid[1][1] + grid[2][0]
+	if abs(diag1) == 3:
+		return grid[0][0]
+	if abs(diag2) == 3:
+		return grid[0][2]
+	
+	return 0  # No winner
 
 func check_winner():
-	for i in range(3):
-		if abs(grid_data[i][0] + grid_data[i][1] + grid_data[i][2]) == 3:
-			return grid_data[i][0]
-		if abs(grid_data[0][i] + grid_data[1][i] + grid_data[2][i]) == 3:
-			return grid_data[0][i]
-
-	if abs(grid_data[0][0] + grid_data[1][1] + grid_data[2][2]) == 3:
-		return grid_data[0][0]
-	if abs(grid_data[0][2] + grid_data[1][1] + grid_data[2][0]) == 3:
-		return grid_data[0][2]
-
-	return 0
+	return check_winner_grid(grid_data)
 
 func check_end_state():
 	winner = check_winner()
@@ -90,114 +102,106 @@ func check_end_state():
 		return true
 	return false
 
-func best_move():
-	var best_score = -INF
-	var move = Vector2i(-1, -1)
+func copy_grid(grid):
+	var new_grid = []
+	for row in grid:
+		new_grid.append(row.duplicate())
+	return new_grid
 
-	# Check for immediate threats to block
-	for y in range(3):
-		for x in range(3):
-			if grid_data[y][x] == 0:
-				grid_data[y][x] = 1  # Simulate player's move
-				if check_winner() == 1:  # Player can win
-					grid_data[y][x] = -1  # Block the player
-					moves += 1
-					create_marker(player, Vector2i(x, y) * cell_size + Vector2i(cell_size / 2, cell_size / 2))
-					if not check_end_state():
-						player *= -1
-						if temp_marker:
-							temp_marker.queue_free()
-						create_marker(player, player_panel_pos + Vector2i(cell_size / 2, cell_size / 2), true)
-					return
-				grid_data[y][x] = 0  # Reset the board
-
-	# Detect double threats from the player and block if necessary
-	for y in range(3):
-		for x in range(3):
-			if grid_data[y][x] == 0:
-				grid_data[y][x] = 1
-				if detect_double_threat():  # Player can create a double threat
-					grid_data[y][x] = -1  # Block the setup
-					moves += 1
-					create_marker(player, Vector2i(x, y) * cell_size + Vector2i(cell_size / 2, cell_size / 2))
-					if not check_end_state():
-						player *= -1
-						if temp_marker:
-							temp_marker.queue_free()
-						create_marker(player, player_panel_pos + Vector2i(cell_size / 2, cell_size / 2), true)
-					return
-				grid_data[y][x] = 0  # Reset the board
-
-	# Use minimax to determine the best move if no immediate threat or double threat exists
-	for y in range(3):
-		for x in range(3):
-			if grid_data[y][x] == 0:
-				grid_data[y][x] = -1  # AI makes a move
-				moves += 1
-				var score = minimax(0, true)
-				grid_data[y][x] = 0  # Undo the move
-				moves -= 1
-				if score > best_score:
-					best_score = score
-					move = Vector2i(x, y)
-
-	# Execute the best move found
-	grid_data[move.y][move.x] = -1
-	moves += 1
-	create_marker(player, move * cell_size + Vector2i(cell_size / 2, cell_size / 2))
-
-	if not check_end_state():
-		player *= -1
-		if temp_marker:
-			temp_marker.queue_free()
-		create_marker(player, player_panel_pos + Vector2i(cell_size / 2, cell_size / 2), true)
-
-func minimax(depth, is_maximizing):
-	# Evaluate the board for a win/loss/draw
-	var result = check_winner()
-	if result == 1:  # Player wins
-		return -10 + depth
-	elif result == -1:  # AI wins
+func minimax(grid, depth, is_maximizing):
+	var result = check_winner_grid(grid)
+	if result == -1:  # AI wins
 		return 10 - depth
-	elif moves == 9:  # Draw
-		return 0
+	elif result == 1:  # Human wins
+		return depth - 10
+	elif is_grid_full(grid):
+		return 0  # Draw
 
-	if is_maximizing:  # AI's turn
+	if is_maximizing:
 		var best_score = -INF
 		for y in range(3):
 			for x in range(3):
-				if grid_data[y][x] == 0:
-					grid_data[y][x] = -1  # AI makes a move
-					moves += 1
-					var score = minimax(depth + 1, false)
-					grid_data[y][x] = 0  # Undo the move
-					moves -= 1
+				if grid[y][x] == 0:
+					var new_grid = copy_grid(grid)
+					new_grid[y][x] = -1  # AI's move
+					var score = minimax(new_grid, depth + 1, false)
 					best_score = max(best_score, score)
 		return best_score
-	else:  # Player's turn
+	else:
 		var best_score = INF
 		for y in range(3):
 			for x in range(3):
-				if grid_data[y][x] == 0:
-					grid_data[y][x] = 1  # Player makes a move
-					moves += 1
-					var score = minimax(depth + 1, true)
-					grid_data[y][x] = 0  # Undo the move
-					moves -= 1
+				if grid[y][x] == 0:
+					var new_grid = copy_grid(grid)
+					new_grid[y][x] = 1  # Human's move
+					var score = minimax(new_grid, depth + 1, true)
 					best_score = min(best_score, score)
 		return best_score
 
-func detect_double_threat():
-	# Checks if the player can create a double threat
-	var threat_count = 0
+func is_grid_full(grid):
+	for y in range(3):
+		for x in range(3):
+			if grid[y][x] == 0:
+				return false
+	return true
+
+func best_move():
+	var _best_score = -INF  # Renamed to avoid unused variable warning
+	var _best_move = Vector2i(-1, -1)  # Renamed to avoid shadowing function name
+	
+	# First check if AI can win immediately
 	for y in range(3):
 		for x in range(3):
 			if grid_data[y][x] == 0:
-				grid_data[y][x] = 1
-				if check_winner() == 1:
-					threat_count += 1
-				grid_data[y][x] = 0
-	return threat_count >= 2
+				var grid_copy = copy_grid(grid_data)
+				grid_copy[y][x] = -1
+				if check_winner_grid(grid_copy) == -1:
+					_best_move = Vector2i(x, y)
+					break
+		if _best_move != Vector2i(-1, -1):
+			break
+	
+	# Then check if player can win next turn (block)
+	if _best_move == Vector2i(-1, -1):
+		for y in range(3):
+			for x in range(3):
+				if grid_data[y][x] == 0:
+					var grid_copy = copy_grid(grid_data)
+					grid_copy[y][x] = 1
+					if check_winner_grid(grid_copy) == 1:
+						_best_move = Vector2i(x, y)
+						break
+			if _best_move != Vector2i(-1, -1):
+				break
+	
+	# If no immediate win/block, use Minimax
+	if _best_move == Vector2i(-1, -1):
+		var highest_score = -INF
+		for y in range(3):
+			for x in range(3):
+				if grid_data[y][x] == 0:
+					var grid_copy = copy_grid(grid_data)
+					grid_copy[y][x] = -1
+					var current_score = minimax(grid_copy, 0, false)
+					if current_score > highest_score:
+						highest_score = current_score
+						_best_move = Vector2i(x, y)
+	
+	# Execute the best move
+	if _best_move != Vector2i(-1, -1):
+		grid_data[_best_move.y][_best_move.x] = -1
+		moves += 1
+		@warning_ignore("narrowing_conversion")
+		create_marker(-1, _best_move * cell_size + Vector2i(cell_size / 2.0, cell_size / 2.0))
+		
+		if check_end_state():
+			return
+		
+		player *= -1
+		if temp_marker:
+			temp_marker.queue_free()
+		@warning_ignore("narrowing_conversion")
+		create_marker(player, player_panel_pos + Vector2i(cell_size / 2.0, cell_size / 2.0), true)
 
 func _on_game_over_menu_restart_game():
 	new_game()
